@@ -136,9 +136,9 @@
             const [bgUrl, setBgUrl] = useState('./video.mp4');
             const [customInput, setCustomInput] = useState('');
             
-            const [bgBrightness, setBgBrightness] = useState(0.8);
+            const [bgBrightness, setBgBrightness] = useState(0.4);
             const [bgBlur, setBgBlur] = useState(0); 
-            const [textColor, setTextColor] = useState('#ffffff');
+            const [textColor, setTextColor] = useState('#cccccc');
             const [glassOpacity, setGlassOpacity] = useState(0.1);
             
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -312,7 +312,7 @@
                                     <div className="space-y-4 animate-in fade-in duration-300">
                                         <div className="flex items-center justify-between"><span className="text-xs uppercase font-bold opacity-80 flex gap-2"><Palette size={14}/> Độ đục kính</span><input type="range" min="0" max="1" step="0.05" value={glassOpacity} onChange={(e)=>setGlassOpacity(e.target.value)} className="w-1/2"/></div>
                                         <div className="flex items-center justify-between"><span className="text-xs uppercase font-bold opacity-80 flex gap-2"><Type size={14}/> Màu chữ</span><input type="color" value={textColor} onChange={(e)=>setTextColor(e.target.value)} className="w-8 h-8 rounded-full cursor-pointer bg-transparent border border-white/30 p-0 shadow-sm"/></div>
-                                        <div className="pt-2 text-right"><button onClick={()=>{setBgBrightness(0.8);setBgBlur(0);setTextColor('#ffffff');setGlassOpacity(0.1)}} className="text-xs underline opacity-50 hover:opacity-100">Mặc định</button></div>
+                                        <div className="pt-2 text-right"><button onClick={()=>{setBgBrightness(0.8);setBgBlur(0);setTextColor('#ffffff');setGlassOpacity(0)}} className="text-xs underline opacity-50 hover:opacity-100">Mặc định</button></div>
                                     </div>
                                 )}
                             </div>
