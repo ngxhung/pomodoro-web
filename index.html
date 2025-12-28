@@ -8,7 +8,7 @@
     <!-- 1. Cài đặt Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 2. Cấu hình Tailwind (Animation & Custom Styles) -->
+    <!-- 2. Cấu hình Tailwind -->
     <script>
         tailwind.config = {
             theme: {
@@ -18,9 +18,9 @@
                             'from': { opacity: '0', transform: 'scale(0.5) translate(100px, 100px)' },
                             'to': { opacity: '1', transform: 'scale(1) translate(0, 0)' }
                         },
-                        'expand-panel-left': {
-                            'from': { opacity: '0', transform: 'scale(0.5) translate(-100px, 100px)' },
-                            'to': { opacity: '1', transform: 'scale(1) translate(0, 0)' }
+                        'slide-in-left': {
+                            'from': { opacity: '0', transform: 'translateX(-20px)' },
+                            'to': { opacity: '1', transform: 'translateX(0)' }
                         },
                         'typing': {
                             '0%, 80%, 100%': { transform: 'scale(0)' },
@@ -29,7 +29,7 @@
                     },
                     animation: {
                         'expand-settings': 'expand-panel 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                        'expand-ai': 'expand-panel-left 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'slide-chat': 'slide-in-left 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     }
                 }
@@ -37,7 +37,7 @@
         }
     </script>
 
-    <!-- 3. Cài đặt React & Babel (Để chạy code React trực tiếp trên trình duyệt) -->
+    <!-- 3. Cài đặt React & Babel -->
     <script type="importmap">
         {
             "imports": {
@@ -49,13 +49,12 @@
     </script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- CSS Bổ sung cho hiệu ứng kính -->
+    <!-- CSS Bổ sung -->
     <style>
         body { background: #000; overflow: hidden; }
         
         .glass-element {
-            /* Nền kính */
-            background: linear-gradient(135deg, rgba(255, 255, 255, calc(var(--glass-opacity, 0.1) + 0.1)) 0%, rgba(255, 255, 255, var(--glass-opacity, 0.1)) 100%);
+            background: linear-gradient(135deg, rgba(255, 255, 255, calc(var(--glass-opacity, 0) + 0.05)) 0%, rgba(255, 255, 255, var(--glass-opacity, 0)) 100%);
             backdrop-filter: blur(12px) saturate(160%) contrast(110%);
             -webkit-backdrop-filter: blur(12px) saturate(160%) contrast(110%);
             border-top: 1px solid rgba(255, 255, 255, 0.4);
@@ -64,6 +63,14 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), inset 1px 1px 2px rgba(255, 255, 255, 0.3), inset -5px -5px 15px rgba(0, 0, 0, 0.05), inset 5px 5px 15px rgba(255, 255, 255, 0.2);
             border-radius: 24px;
+        }
+
+        .glass-chat-window {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
         .glass-pill { border-radius: 9999px !important; }
@@ -90,9 +97,9 @@
         .text-shadow-lg { text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         
         .glass-input {
-            background: rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: inset 1px 1px 4px rgba(0,0,0,0.1); color: inherit;
+            background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: inset 1px 1px 4px rgba(0,0,0,0.1); color: inherit;
         }
-        .glass-input:focus { background: rgba(0, 0, 0, 0.2); outline: none; border-color: rgba(255, 255, 255, 0.5); }
+        .glass-input:focus { background: rgba(0, 0, 0, 0.3); outline: none; border-color: rgba(255, 255, 255, 0.5); }
         
         input[type=range] { -webkit-appearance: none; background: transparent; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #ffffff; cursor: pointer; margin-top: -6px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.8); }
@@ -103,6 +110,17 @@
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        
+        .bubble-user {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px 16px 0 16px;
+        }
+        .bubble-ai {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px 16px 16px 0;
+        }
     </style>
 </head>
 <body>
@@ -112,12 +130,14 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { Play, Pause, RotateCcw, Settings, Upload, Check, Clock, Palette, Sun, Eye, Type, X, Sparkles, Brain, ListTodo } from 'lucide-react';
+        import { Play, Pause, RotateCcw, Settings, Upload, Check, Clock, Palette, Sun, Eye, Type, X, Sparkles, Send, AlertCircle } from 'lucide-react';
 
         const App = () => {
-            // --- CONFIG ---
-            // QUAN TRỌNG: Bạn cần điền API Key của mình vào đây để dùng tính năng AI
+            // --- API KEY ---
             const apiKey = "AIzaSyARu04JPaC7ZTgJvNcIBk2PjmgKqMg1IMs"; 
+
+            // --- HÌNH NỀN DỰ PHÒNG ---
+            //const DEFAULT_BG = 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=2070&auto=format&fit=crop';
 
             const [durations, setDurations] = useState({ focus: 45, shortBreak: 5, longBreak: 15 });
             const MODES = {
@@ -132,66 +152,78 @@
             const [isActive, setIsActive] = useState(false);
             const timerRef = useRef(null);
 
-            const [bgType, setBgType] = useState('video');
-            const [bgUrl, setBgUrl] = useState('./video.mp4');
+            // --- CONFIG HÌNH NỀN ---
+            const [bgType, setBgType] = useState('video'); 
+            const [bgUrl, setBgUrl] = useState('./video.mp4'); 
+            const [videoError, setVideoError] = useState(false);
+
             const [customInput, setCustomInput] = useState('');
-            
-            const [bgBrightness, setBgBrightness] = useState(0.4);
+            const [bgBrightness, setBgBrightness] = useState(0.8);
             const [bgBlur, setBgBlur] = useState(0); 
-            const [textColor, setTextColor] = useState('#cccccc');
-            const [glassOpacity, setGlassOpacity] = useState(0.0);
+            const [textColor, setTextColor] = useState('#ffffff'); 
+            const [glassOpacity, setGlassOpacity] = useState(0); 
             
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
             const [activeTab, setActiveTab] = useState('timer');
 
-            // AI State
+            // --- AI CHAT STATE ---
             const [isAIOpen, setIsAIOpen] = useState(false);
-            const [aiTab, setAiTab] = useState('plan'); 
-            const [userGoal, setUserGoal] = useState('');
-            const [aiResponse, setAiResponse] = useState(null);
+            const [chatHistory, setChatHistory] = useState([
+                { role: 'model', text: 'Xin chào! Tôi là Zen AI. Tôi có thể giúp gì cho bạn hôm nay?' }
+            ]);
+            const [chatInput, setChatInput] = useState('');
             const [isLoadingAI, setIsLoadingAI] = useState(false);
-            const [currentTask, setCurrentTask] = useState(''); 
+            const chatEndRef = useRef(null);
             
             const soundEnabled = true;
 
-            // --- AI Logic ---
-            const callGemini = async (prompt) => {
-                if (!apiKey) {
-                    setAiResponse("Vui lòng nhập API Key trong code (dòng 92) để sử dụng tính năng này.");
-                    return;
-                }
+            // --- AI Logic (Chat Mode) ---
+            const scrollToBottom = () => {
+                chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            };
+
+            useEffect(() => {
+                scrollToBottom();
+            }, [chatHistory, isAIOpen]);
+
+            const handleChatSubmit = async () => {
+                if (!chatInput.trim() || !apiKey) return;
+                
+                const userMsg = chatInput;
+                setChatInput('');
+                setChatHistory(prev => [...prev, { role: 'user', text: userMsg }]);
                 setIsLoadingAI(true);
-                setAiResponse(null);
+
                 try {
+                    const historyForApi = chatHistory.slice(-10).map(msg => ({
+                        role: msg.role === 'model' ? 'model' : 'user',
+                        parts: [{ text: msg.text }]
+                    }));
+                    historyForApi.push({ role: 'user', parts: [{ text: userMsg }] });
+
                     const response = await fetch(
                         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
                         {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+                            body: JSON.stringify({ contents: historyForApi }),
                         }
                     );
+                    
                     const data = await response.json();
-                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    setAiResponse(text || "Xin lỗi, AI đang bận.");
+                    const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
+                    if (aiText) {
+                        setChatHistory(prev => [...prev, { role: 'model', text: aiText }]);
+                    } else {
+                        setChatHistory(prev => [...prev, { role: 'model', text: 'Xin lỗi, tôi gặp chút trục trặc.' }]);
+                    }
                 } catch (error) {
                     console.error(error);
-                    setAiResponse("Lỗi kết nối AI.");
+                    setChatHistory(prev => [...prev, { role: 'model', text: 'Lỗi kết nối.' }]);
                 } finally {
                     setIsLoadingAI(false);
                 }
-            };
-
-            const handleGeneratePlan = () => {
-                if (!userGoal.trim()) return;
-                const prompt = `Tôi có mục tiêu là: "${userGoal}". Hãy chia nhỏ mục tiêu này thành 3-5 đầu việc cụ thể (25-45p/việc). Chỉ trả về danh sách gạch đầu dòng, tiếng Việt.`;
-                callGemini(prompt);
-            };
-
-            const handleGetTips = () => {
-                const context = mode === 'focus' ? "đang tập trung" : "đang nghỉ giải lao";
-                const prompt = `Người dùng ${context}. Cho 1 lời khuyên ngắn (<30 từ) về sức khoẻ/động lực. Tiếng Việt.`;
-                callGemini(prompt);
             };
 
             // --- Timer Logic ---
@@ -234,6 +266,7 @@
                     setBgUrl(URL.createObjectURL(file));
                     setBgType(file.type.startsWith('video') ? 'video' : 'image');
                     setCustomInput('');
+                    setVideoError(false);
                 }
             };
 
@@ -246,7 +279,6 @@
                 osc.start(); setTimeout(() => osc.stop(), 500);
             };
 
-            // CSS Variables dynamic injection
             const styleVars = { '--glass-opacity': glassOpacity, color: textColor };
 
             return (
@@ -255,9 +287,92 @@
                     {/* BACKGROUND */}
                     <div className="absolute inset-0 z-0 bg-black">
                         <div className="w-full h-full transition-all duration-700" style={{ filter: `brightness(${bgBrightness}) blur(${bgBlur}px)`, transform: `scale(${1 + bgBlur/100})` }}>
-                            {bgType === 'video' ? <video key={bgUrl} className="w-full h-full object-cover" autoPlay loop muted playsInline src={bgUrl}/> : <img src={bgUrl} alt="Bg" className="w-full h-full object-cover"/>}
+                            {(bgType === 'video' && !videoError) ? (
+                                <video 
+                                    key={bgUrl} 
+                                    className="w-full h-full object-cover" 
+                                    autoPlay loop muted playsInline 
+                                    src={bgUrl}
+                                    onError={(e) => {
+                                        // Sửa lỗi Circular Object
+                                        console.warn("Video load error, switching to fallback.");
+                                        setVideoError(true);
+                                    }}
+                                />
+                            ) : (
+                                <img 
+                                    // Nếu có lỗi video, dùng ảnh mặc định. Nếu không, dùng ảnh custom.
+                                    src={videoError ? DEFAULT_BG : bgUrl} 
+                                    alt="Bg" 
+                                    className="w-full h-full object-cover"
+                                    onError={() => setVideoError(true)}
+                                />
+                            )}
                         </div>
                     </div>
+
+                    {/* ERROR MESSAGE (Vẫn hiển thị để báo user biết) */}
+                    {videoError && (
+                        <div className="absolute top-4 left-4 z-50 bg-red-600/90 backdrop-blur-md text-white px-4 py-3 rounded-xl shadow-lg border border-red-400/50 flex items-start gap-3 max-w-sm">
+                            <AlertCircle className="shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                                <p className="font-bold mb-1">Không tải được video: {bgUrl}</p>
+                                <p className="opacity-90 text-xs mb-2">Đang hiển thị hình nền dự phòng.</p>
+                                <button onClick={() => setVideoError(false)} className="text-xs underline hover:text-white/80">Đóng thông báo</button>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* CHAT WINDOW */}
+                    {isAIOpen && (
+                        <div className="fixed left-4 md:left-10 top-20 bottom-20 w-80 glass-chat-window rounded-3xl flex flex-col z-50 animate-slide-chat border border-white/20 overflow-hidden">
+                            <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+                                <div className="flex items-center gap-2">
+                                    <Sparkles className="text-yellow-300" size={18} />
+                                    <span className="font-bold tracking-wide">Zen AI</span>
+                                </div>
+                                <button onClick={() => setIsAIOpen(false)} className="opacity-60 hover:opacity-100 hover:rotate-90 transition-transform"><X size={18} /></button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                                {chatHistory.map((msg, idx) => (
+                                    <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[85%] px-4 py-2 text-sm leading-relaxed ${msg.role === 'user' ? 'bubble-user text-right' : 'bubble-ai text-left'}`}>
+                                            {msg.text}
+                                        </div>
+                                    </div>
+                                ))}
+                                {isLoadingAI && (
+                                    <div className="flex justify-start">
+                                        <div className="bubble-ai px-4 py-3 flex gap-1">
+                                            <div className="w-1.5 h-1.5 bg-white/60 rounded-full typing-dot"></div>
+                                            <div className="w-1.5 h-1.5 bg-white/60 rounded-full typing-dot"></div>
+                                            <div className="w-1.5 h-1.5 bg-white/60 rounded-full typing-dot"></div>
+                                        </div>
+                                    </div>
+                                )}
+                                <div ref={chatEndRef} />
+                            </div>
+                            <div className="p-3 bg-white/5 border-t border-white/10">
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Nhập tin nhắn..." 
+                                        className="glass-input flex-1 rounded-full px-4 py-2 text-sm"
+                                        value={chatInput}
+                                        onChange={(e) => setChatInput(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleChatSubmit()}
+                                    />
+                                    <button 
+                                        onClick={handleChatSubmit} 
+                                        disabled={isLoadingAI}
+                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors disabled:opacity-50"
+                                    >
+                                        <Send size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* MAIN UI */}
                     <div className="relative z-10 w-full max-w-lg px-4 flex flex-col items-center gap-8 text-custom">
@@ -296,7 +411,7 @@
                                     <div className="space-y-4 animate-in fade-in duration-300">
                                         <div className="flex gap-2">
                                             <input type="text" placeholder="Link ảnh/video..." value={customInput} onChange={(e) => setCustomInput(e.target.value)} className="glass-input flex-1 rounded-xl px-3 py-2 text-sm"/>
-                                            <button onClick={() => { if(customInput) { setBgUrl(customInput); setBgType(customInput.match(/\.(mp4|webm|ogg)$/i) ? 'video':'image'); }}} className="glass-button px-3 rounded-xl"><Check size={18}/></button>
+                                            <button onClick={() => { if(customInput) { setBgUrl(customInput); setBgType(customInput.match(/\.(mp4|webm|ogg)$/i) ? 'video':'image'); setVideoError(false); }}} className="glass-button px-3 rounded-xl"><Check size={18}/></button>
                                         </div>
                                         <div className="relative group">
                                             <div className="w-full glass-button border-dashed flex items-center justify-center gap-2 py-3 rounded-xl hover:bg-white/10 transition-colors"><Upload size={16}/> <span className="text-sm font-medium">Tải file lên</span></div>
@@ -312,34 +427,17 @@
                                     <div className="space-y-4 animate-in fade-in duration-300">
                                         <div className="flex items-center justify-between"><span className="text-xs uppercase font-bold opacity-80 flex gap-2"><Palette size={14}/> Độ đục kính</span><input type="range" min="0" max="1" step="0.05" value={glassOpacity} onChange={(e)=>setGlassOpacity(e.target.value)} className="w-1/2"/></div>
                                         <div className="flex items-center justify-between"><span className="text-xs uppercase font-bold opacity-80 flex gap-2"><Type size={14}/> Màu chữ</span><input type="color" value={textColor} onChange={(e)=>setTextColor(e.target.value)} className="w-8 h-8 rounded-full cursor-pointer bg-transparent border border-white/30 p-0 shadow-sm"/></div>
-                                        <div className="pt-2 text-right"><button onClick={()=>{setBgBrightness(0.8);setBgBlur(0);setTextColor('#ffffff');setGlassOpacity(0)}} className="text-xs underline opacity-50 hover:opacity-100">Mặc định</button></div>
+                                        <div className="pt-2 text-right"><button onClick={()=>{setBgBrightness(0.8);setBgBlur(0);setTextColor('#ffffff');setGlassOpacity(0.1)}} className="text-xs underline opacity-50 hover:opacity-100">Mặc định</button></div>
                                     </div>
                                 )}
                             </div>
                         )}
 
-                        {/* AI PANEL */}
-                        {isAIOpen && (
-                            <div className="w-full glass-element rounded-3xl p-6 animate-expand-ai backdrop-blur-2xl absolute z-50 bottom-24 shadow-2xl border border-white/40 overflow-hidden" style={{ transformOrigin: '3rem 100%' }}>
-                                <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
-                                    <div className="flex items-center gap-2"><Sparkles className="text-yellow-300" size={18}/><span className="text-sm font-bold uppercase tracking-wider">Trợ lý Zen AI</span></div>
-                                    <button onClick={() => setIsAIOpen(false)} className="hover:rotate-90 transition-transform"><X size={18}/></button>
-                                </div>
-                                <div className="flex mb-4 bg-black/10 rounded-xl p-1">
-                                    <button onClick={()=>{setAiTab('plan');setAiResponse(null)}} className={`flex-1 py-2 text-xs font-bold rounded-lg ${aiTab==='plan'?'bg-white/20 shadow':'opacity-60'}`}>Kế hoạch</button>
-                                    <button onClick={()=>{setAiTab('tips');setAiResponse(null);handleGetTips()}} className={`flex-1 py-2 text-xs font-bold rounded-lg ${aiTab==='tips'?'bg-white/20 shadow':'opacity-60'}`}>Lời khuyên</button>
-                                </div>
-                                {aiTab === 'plan' && (
-                                    <div className="flex gap-2 mb-3">
-                                        <input type="text" placeholder="Mục tiêu..." value={userGoal} onChange={(e)=>setUserGoal(e.target.value)} onKeyDown={(e)=>e.key==='Enter'&&handleGeneratePlan()} className="glass-input flex-1 rounded-xl px-3 py-2 text-sm"/>
-                                        <button onClick={handleGeneratePlan} disabled={isLoadingAI} className="glass-button p-2 rounded-xl bg-blue-500/20">{isLoadingAI?<Brain size={18} className="animate-pulse"/>:<ListTodo size={18}/>}</button>
-                                    </div>
-                                )}
-                                <div className="mt-2 p-3 bg-white/5 rounded-xl border border-white/10 text-sm leading-relaxed max-h-60 overflow-y-auto custom-scrollbar">
-                                    {isLoadingAI ? <div className="flex justify-center gap-1 py-4"><div className="w-2 h-2 bg-white rounded-full typing-dot"></div><div className="w-2 h-2 bg-white rounded-full typing-dot"></div><div className="w-2 h-2 bg-white rounded-full typing-dot"></div></div> : (aiResponse || <span className="opacity-50 text-xs">...</span>)}
-                                </div>
-                            </div>
-                        )}
+                        {/* TIMER */}
+                        <div className="relative py-8">
+                            <div className="text-[9rem] leading-none font-light tracking-tighter select-none tabular-nums relative z-10 drop-shadow-2xl">{formatTime(timeLeft)}</div>
+                            <div className="text-center opacity-70 text-sm tracking-[0.3em] font-light uppercase mt-2">{isActive ? 'Đang tập trung' : 'Sẵn sàng?'}</div>
+                        </div>
 
                         {/* MODE SELECTOR */}
                         <div className="glass-element glass-pill p-1.5 flex w-full max-w-sm relative overflow-hidden">
@@ -349,12 +447,6 @@
                                     {m.label}
                                 </button>
                             ))}
-                        </div>
-
-                        {/* TIMER */}
-                        <div className="relative py-8">
-                            <div className="text-[9rem] leading-none font-light tracking-tighter select-none tabular-nums relative z-10 drop-shadow-2xl">{formatTime(timeLeft)}</div>
-                            <div className="text-center opacity-70 text-sm tracking-[0.3em] font-light uppercase mt-2">{isActive ? 'Đang tập trung' : 'Sẵn sàng?'}</div>
                         </div>
 
                         {/* CONTROLS */}
